@@ -1,29 +1,19 @@
 import { world, system, Vector } from "@minecraft/server"
-
-let filter = {
-    families: [ "helicopter" ]
-}
-
-const dimensionIdObject = {
-    "minecraft:overworld" : "overworld",
-    "minecraft:nether" : "nether",
-    "minecraft:the_end" : "the_end",
-}
+import { viewFlyTypes, threeStateFlyTypes, dimensionIdObject } from "../main"
 
 export function main(){
     flyingSystem()
-    check_ride()
+    checkRide()
 }
 
 function flyingSystem() {
     system.runInterval(() => {
         for (const player of world.getPlayers()) {
-            if(player.hasTag("riding")) { 
+            if(player.hasTag("ridingHelicopter")) { 
                 const ride = getRide(player)
                 setPlayerCamera(player)
-                switch_modes(player, ride)
-                if(!player.hasTag("riding")) ride?.removeTag("hovering") 
-            } else player.camera.clear()
+                switchModes(player, ride)
+            } else if(!checkFamily(getRide(player), player, viewFlyTypes)) player.camera.clear()
             removeTags(player)
         }
     })
@@ -38,19 +28,19 @@ function setPlayerCamera(player) {
         easeOptions : { easeTime : 1,  easeType : 'Spring' } } )
 }
 
-function switch_modes(player, ride) {
-    // state-maschine for the flying system
+function switchModes(player, ride) {
+    // state-maschine for the flying system.
     if(player.isJumping) {
         player.setDynamicProperty("end", Date.now())
-        if(setHoverState(player, ride)) return
-        player.setDynamicProperty("start", Date.now())
+        if(!setHoverState(player, ride)) player.setDynamicProperty("start", Date.now())
     } else if(ride?.hasTag("hovering")) {
         player.onScreenDisplay.setActionBar(" ")
-        ride?.triggerEvent("evt:flight_hover")
+        ride?.applyImpulse({ x: 0, y: 0.0784, z: 0 })
     } else if(!ride?.isOnGround) {
         ride?.removeTag("hovering")
         player.onScreenDisplay.setActionBar("")
-        ride?.triggerEvent("evt:flight_down")
+        ride?.removeEffect("levitation")
+        ride?.addEffect("slow_falling", 20, { amplifier: 0, showParticles: false })
     }
 }
 
@@ -61,7 +51,8 @@ function setHoverState(player, ride) {
         ride?.addTag("hovering") 
         return true
     } else {
-        ride?.triggerEvent("evt:flight_up") 
+        ride?.removeEffect("slow_falling")
+        ride?.addEffect("levitation", 20, { amplifier: 5, showParticles: false })
         player.onScreenDisplay.setActionBar("")
         ride?.removeTag("hovering")
         return false
@@ -70,19 +61,32 @@ function setHoverState(player, ride) {
 
 function removeTags(player) {
     // removes hovering tag when the entity hits the ground.
-    for(const helicopter of world.getDimension(dimensionIdObject[player.dimension.id]).getEntities(filter)) {
+    for(const helicopter of world.getDimension(dimensionIdObject[player.dimension.id]).getEntities({families:threeStateFlyTypes})) {
         if(helicopter.isOnGround && helicopter.hasTag("hovering")) helicopter.removeTag("hovering")
     }
 }
 
-function check_ride() {
-    // adds the riding tag if a player rides a valid entity (check filter constant).
+function checkRide() {
+    // adds the riding tag if a player rides a valid entity (check threeStateFlyTypes constant).
     system.runInterval(() => {
         for (const player of world.getPlayers()) {
-            if (getRide(player)?.matches(filter)) player.addTag("riding")
-            else player.removeTag("riding")
+            if (checkFamily(getRide(player), player, threeStateFlyTypes)) player.addTag("ridingHelicopter")
+            else player.removeTag("ridingHelicopter")
         }
     })
+}
+
+function checkFamily(entity, player, families) {
+    // This ensures that the specified entity is a valid rideable entity.
+    for(const family of families) {
+        const entities = world.getDimension(dimensionIdObject[player.dimension.id]).getEntities({ families: [family] });
+        
+        for (const e of entities) {
+            if (e?.typeId === entity?.typeId) {
+                return family;
+            }
+        }
+    }
 }
 
 const getRide = (entity) => {
