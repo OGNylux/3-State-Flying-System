@@ -7,6 +7,12 @@ export function main() {
 }
 
 function flyingSystem() {
+    /*    
+        This system allows players to fly with helicopters in three different modes:
+        1. Ascend: The player can ascend by double-tapping the ascend button.
+        2. Hover: The player can hover in place by double-tapping the ascend button again.
+        3. Descend: The player can descend by holding the descend button.
+    */
     system.runInterval(() => {
         for (const player of world.getPlayers({ tags: ["ridingHelicopter"] })) {
             const ride: Entity = getRide(player)
@@ -26,7 +32,10 @@ function flyingSystem() {
 }
 
 function setPlayerCamera(player: Player, helicopter: Vehicle) {
-    // change the z_direction_shift to shift the camera farther/closer to the player (-18, 2 for now).
+    /*        
+        Sets the player's camera to follow the helicopter's position and orientation.
+        The camera is positioned behind the helicopter, with a slight upward shift.
+    */
     const entity: Entity = helicopter.entity
     if(!entity || !player) return;
 
@@ -39,7 +48,12 @@ function setPlayerCamera(player: Player, helicopter: Vehicle) {
 }
 
 function switchModes(player: Player, helicopter: Vehicle) {
-    // state-maschine for the flying system.
+    /*        
+        Switches between the three flying modes based on player input:
+        - Ascend: Double-tap the ascend button to hover.
+        - Hover: Hold the ascend button to hover in place.
+        - Descend: Hold the descend button to fall down.
+    */
     const entity: Entity = helicopter.entity
 
     if(player.isJumping) {
@@ -57,7 +71,10 @@ function switchModes(player: Player, helicopter: Vehicle) {
 }
 
 function setHoverState(player: Player, helicopter: Vehicle) {
-    // sets the hoverstate if the player double taps the ascend button in a 75-300ms timeframe.
+    /*        
+        Sets the hover state based on the time elapsed between the last two jumps.
+        If the time is within a certain range, the player hovers; otherwise, they go down.
+    */
     const lowerThreshold = 75;
     const upperThreshold = 300;
 
@@ -80,14 +97,20 @@ function setHoverState(player: Player, helicopter: Vehicle) {
 }
 
 function removeTags(player: Player) {
-    // removes hovering tag when the entity hits the ground.
+    /*        
+        Removes the "hovering" tag from helicopters that are on the ground.
+        This ensures that helicopters do not remain in a hovering state when they land.
+    */
     for(const helicopter of world.getDimension(player.dimension.id).getEntities({families: ["helicopter"]})) {
         if(helicopter.isOnGround && helicopter.hasTag("hovering")) helicopter.removeTag("hovering")
     }
 }
 
 function checkRide() {
-    // adds the riding tag if a player rides a valid entity (check threeStateFlyTypes constant).
+    /*        
+        Checks if players are riding helicopters and adds the "ridingHelicopter" tag.
+        This tag is used to identify players who are currently riding a helicopter.
+    */
     system.runInterval(() => {
         for (const player of world.getPlayers()) {
             const ride: Entity = getRide(player)
@@ -101,13 +124,22 @@ function checkRide() {
 }
 
 const getRide = (entity: Entity) => {
+    /*        
+        Retrieves the entity that the player is currently riding.
+    */
     return entity.getComponent("minecraft:riding")?.entityRidingOn
 }
 
 function vectorMultiply(vector: Vector3, multiplier: number) {
+    /*        
+        Multiplies a vector by a scalar value.
+    */
     return { x: vector.x * multiplier, y: vector.y * multiplier, z: vector.z * multiplier }
 }
 
 function vectorAdd(vector1: Vector3, vector2: Vector3) {
+    /*        
+        Adds two vectors together.
+    */
     return { x: vector1.x + vector2.x, y: vector1.y + vector2.y, z: vector1.z + vector2.z }
 }
