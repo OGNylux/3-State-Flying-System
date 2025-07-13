@@ -1,0 +1,145 @@
+{
+	"format_version": "1.20.60",
+	"minecraft:entity": {
+		"description": {
+			"identifier": "nylux:test_pig",
+			"is_spawnable": true,
+			"is_summonable": true,
+			"is_experimental": false
+		},
+		"component_groups": {
+			"nylux:on_ground": {
+				"minecraft:movement": {
+					"value": 0.0
+				}
+			},
+			"nylux:in_air": {
+				"minecraft:movement": {
+					"value": 0.5
+				}
+			},
+			"nylux:despawn": {
+				"minecraft:instant_despawn": {
+					"remove_child_entities": false
+				}
+			}
+		},
+		"components": {
+			"minecraft:can_power_jump": {},
+			"minecraft:horse.jump_strength": {
+				"value": {
+					"range_min": 0,
+					"range_max": 0
+				}
+			},
+			"minecraft:rideable": {
+				"seat_count": 1,
+				"crouching_skip_interact": true,
+				"rider_can_interact": true,
+				"family_types": [
+					"player"
+				],
+				"pull_in_entities": false,
+				"interact_text": "action.interact.enter_vehicle",
+          		"seats": {
+          		  "position": [ 0.0, 0.63, 0.0 ]
+          		}
+			},
+			"minecraft:environment_sensor": {
+				"triggers": [
+					{
+						"event": "evt:on_ground",
+						"target": "self",
+						"filters": {
+							"test": "on_ground"
+						}
+					},
+					{
+						"event": "evt:in_air",
+						"target": "self",
+						"filters": {
+							"operator": "not",
+							"test": "on_ground"
+						}
+					}
+				]
+			},
+			"minecraft:input_ground_controlled": {},
+			"minecraft:behavior.player_ride_tamed": {},
+			"minecraft:movement.basic": {},
+      		"minecraft:collision_box": {
+      		  "width": 0.9,
+      		  "height": 0.9
+      		},
+			"minecraft:navigation.walk": {},
+			"minecraft:physics": {},
+			"minecraft:pushable": {
+				"is_pushable": false,
+				"is_pushable_by_piston": false
+			},
+			"minecraft:type_family": {
+				"family": [
+					"helicopter"
+				]
+			},
+			"minecraft:health": {
+				"value": 20,
+				"max": 20
+			},
+			"minecraft:breathable": {
+				"total_supply": 15,
+				"suffocate_time": -20,
+				"inhale_time": 0,
+				"breathes_air": true,
+				"breathes_water": false,
+				"breathes_lava": false,
+				"breathes_solids": false,
+				"generates_bubbles": true,
+				"breathe_blocks": [],
+				"non_breathe_blocks": []
+			},
+			"minecraft:fire_immune": {},
+			"minecraft:jump.static": {}
+		},
+		"events": {
+			"minecraft:entity_spawned": {
+				"add": {
+					"component_groups": [
+						"nylux:on_ground"
+					]
+				}
+			},
+			"evt:in_air": {
+				"remove": {
+					"component_groups": [
+						"nylux:on_ground"
+					]
+				},
+				"add": {
+					"component_groups": [
+						"nylux:in_air"
+					]
+				}
+			},
+			"evt:on_ground": {
+				"add": {
+					"component_groups": [
+						"nylux:on_ground"
+					]
+				},
+				"remove": {
+					"component_groups": [
+						"nylux:in_air"
+					]
+				}
+			},
+			"evt:despawn": {
+				"add": {
+					"component_groups": [
+						"nylux:despawn"
+					]
+				}
+			}
+		}
+	}
+}

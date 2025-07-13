@@ -19,12 +19,7 @@ This flying-system has three states: ascend, descend and hover. This project is 
 
 ## Setup
 
-1. Download the fly.js script and put it in the scripts folder of your behavior pack
-2. Import the module and access the main function via fly.main()
-3. Add your entity to your main script via 
-```js
-export const viewFlyTypes = [ "FAMILY" ]
-```
-5. As of 1.20.72 you need to upgrade to the '1.10.0-beta' and activate 'Beta APIs' for this module to function. (I'm too lazy to implement my own Vector manipulation functions)
-
-Disclaimer: You may need to add custom glyphs so the states are properly displayed on the actionbar.
+1. Download the threeStateFlyingSystem.js script and put it in the scripts folder of your behavior pack
+2. Import the module and access the main function via threeStateFlyingSystem.main()
+3. Add the entity to the Vehicles class
+4. Add the family `helicopter` to the entity's behavior
